@@ -1,0 +1,41 @@
+---
+title: VS Code - Tailwind CSS IntelliSense(자동 완성 Extension)
+description: Tailwind CSS IntelliSense는 tailwindcss 클래스를 권장 클래스 순서에 따라 자동 정렬해주는 prettier 플러그인 입니다.
+tag: tailwindCSS, vscode, 프론트엔드
+date: 2024/3/23
+---
+
+![](https://velog.velcdn.com/images/freejak5520/post/34b346cd-6998-4746-bc35-415b71ff9a89/image.jpg)
+tailwindcss 클래스를 [권장 클래스 순서](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted)에 따라 자동 정렬해주는 prettier 플러그인 입니다.
+## 설치
+```bash
+npm install -D prettier prettier-plugin-tailwindcss
+# or
+yarn add -D prettier prettier-plugin-tailwindcss
+```
+
+이후 프로젝트 루트에 prettier.config.js 파일이 없을 경우 파일을 추가하고 아래 내용을 추가합니다.
+```javascript
+// prettier.config.js
+module.exports = {
+  plugins: ['prettier-plugin-tailwindcss'],
+}
+```
+
+## 사용
+
+prettier 적용 전
+
+```jsx
+<div className="px-12 flex-col gap-10 py-5 flex w-full">
+```
+
+prettier 적용 후
+
+```jsx
+<div className="flex w-full flex-col gap-10 px-12 py-5">
+```
+
+## 참고
+
+https://github.com/tailwindlabs/prettier-plugin-tailwindcss?tab=readme-ov-file
