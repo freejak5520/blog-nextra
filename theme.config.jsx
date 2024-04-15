@@ -1,5 +1,14 @@
 const config = {
-  footer: <p>MIT 2023 © Nextra.</p>,
+  footer: (() => {
+    return (
+      <small style={{ display: "flex", justifyContent: "space-between" }}>
+        <div>
+          © <time>{new Date().getFullYear()}.</time> smoothsquid. All rights
+          reserved.
+        </div>
+      </small>
+    );
+  })(),
   head: ({ title, meta }) => (
     <>
       {meta.description && (
