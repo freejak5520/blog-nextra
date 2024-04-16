@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@phntms/next-gtm": "^0.3.0",
+    "@vercel/analytics": "^1.2.2",
     "next": "14.2.1",
     "nextra": "^2.13.4",
     "nextra-theme-blog": "^2.13.4",
