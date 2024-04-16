@@ -3,6 +3,7 @@ name: Node.js CI
 on:
   pull_request:
     branches: ["main"]
+  workflow_call:
 
 jobs:
   build:
@@ -19,7 +20,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-      # - run: cp .env.example .env
+      - run: cp .env.example .env
       - run: yarn install
       - run: yarn lint
       - run: yarn tsc
