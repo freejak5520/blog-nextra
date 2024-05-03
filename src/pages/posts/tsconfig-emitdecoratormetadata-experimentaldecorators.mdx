@@ -1,0 +1,80 @@
+---
+title: tsconfig - emitDecoratorMetadata, experimentalDecorators 옵션
+description: TypeScript 4.5 버전 이상을 사용할 경우 `tsconfig.json` 해당 설정을 사용하도록 설정했는지 확인하라는 내용을 확인할 수 있습니다. `emitDecoratorMetadata`, `experimentalDecorators` 두 옵션은 어떤 옵션일까
+tag: typescript
+date: 2024/4/21
+---
+
+TypeORM 문서의 Installation 내용을 보던 중 아래의 내용을 확인했습니다.
+
+> **TypeScript configuration**
+>Also, make sure you are using TypeScript version 4.5 or higher, and you have enabled the following settings in tsconfig.json:
+>
+>"emitDecoratorMetadata": true,
+>
+>"experimentalDecorators": true,
+
+TypeScript 4.5 버전 이상을 사용할 경우 `tsconfig.json` 해당 설정을 사용하도록 설정했는지 확인하라는 내용입니다.
+
+`emitDecoratorMetadata`, `experimentalDecorators` 두 옵션은 어떤 옵션일까 호기심으로 검색 해봤습니다.
+
+## experimentalDecorators
+
+키워드로 검색해서 나오는 참고 링크를 이용하여 ChatGPT에게 물어보고 요약해봤습니다.
+
+>experimentalDecorators옵션을 true로 설정할 경우
+>TypeScript 컴파일러에게 클래스와 메서드에 데코레이터 사용을 허용하도록 설정합니다.
+>
+>TC39에서 제안된 데코레이터가 ECMAScript에 추가되기 전에 TypeScript에 구현되어 실험적인 기능으로 사용할 수 있습니다.
+
+ECMAScript에서 제안되고 있는 Decorator 기능을 TypeScript에서 미리 구현하여 실험적 기능으로 제공한다는 내용으로 이해했습니다.
+
+**참고 링크**
+[tsconfig: experimentalDecorators](https://www.typescriptlang.org/tsconfig#experimentalDecorators)
+[TC39 proposal-decorators](https://github.com/tc39/proposal-decorators)
+[TypeScript: Decorators](https://www.typescriptlang.org/ko/docs/handbook/decorators.html)
+
+## emitDecoratorMetadata
+
+참고링크를 ChatGPT에게 물어봤습니다.
+
+>emitDecoratorMetadata 옵션은 TypeScript 컴파일러에게 데코레이터를 사용할 때 해당 데코레이터에 대한 타입 정보를 디자인 타임 메타데이터로 내보내도록 지시합니다.
+>
+>이 옵션이 활성화되면, TypeScript는 데코레이터가 적용된 요소의 타입 정보를 반영(Reflection)을 위해 사용할 수 있는 메타데이터를 생성합니다.
+>
+>이 기능은 Angular와 같은 프레임워크에서 의존성 주입과 같은 기능을 구현할 때 유용하게 사용됩니다.
+
+데코레이터를 사용할 때 데코레이터가 적용된 요소의 타입 정보를 컴파일 시 메타데이터로 포함 한다는 내용 같습니다.
+
+타입스크립트 문서를 확인해보니 [reflect-metadata](https://github.com/rbuckton/reflect-metadata) 모듈에서 사용할 수 있는 metadata가 javascript 파일에 추가된다고 합니다.
+
+```js
+// emitDecoratorMetadata: false
+// code...
+__decorate([
+    LogMethod
+], Demo.prototype, "foo", null);
+const demo = new Demo();
+```
+
+```js
+// emitDecoratorMetadata: true
+// code...
+__decorate([
+    LogMethod,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], Demo.prototype, "foo", null);
+const demo = new Demo();
+```
+
+**참고 링크**
+[tsconfig: emitDecoratorMetadata](https://www.typescriptlang.org/tsconfig#emitDecoratorMetadata)
+
+## 결론?
+
+`experimentalDecorators`옵션은 TypeORM, NestJS, Angular 등 데코레이터를 적극적으로 활용하는 라이브러리나 프레임워크에서 데코레이터 사용을 위해 활성화 해야하는 옵션입니다.
+
+결론적으로 호기심 해결 보단 Decorator, reflect-metadata에 대한 호기심이 생겼습니다.😂
+

@@ -1,0 +1,128 @@
+---
+title: Github pages로 스토리북 배포하기
+description: github pages를 이용해서 스토리북을 배포해봅시다. private 저장소의 경우 github pages 사용하기 위해서는 깃헙 유로 플랜이 필요합니다.
+tag: github, storybook
+date: 2024/4/25
+---
+
+React프로젝트에 스토리북을 적용하고 Github pages를 이용해서 스토리북을 배포해봅시다.
+
+>private 저장소의 경우 github pages 사용하기 위해서는 깃헙 [유로 플랜](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)이 필요합니다.
+
+
+## 프로젝트 생성 및 스토리북 설치
+
+### 리액트 프로젝트 생성
+
+```bash
+npx create-react-app deploy-storybook
+```
+
+### 스토리북 설치
+
+```bash
+npx storybook@latest init
+```
+
+스토리북 설치 및 실행 완료 후 http://localhost:6006 로 접근 가능하고, 예제 스토리를 확인 가능합니다.
+
+### 빌드
+
+아래 명령어로 스토리북을 빌드합니다.
+
+```bash
+npm run build-storybook
+```
+
+빌드가 완료되면 `./storybook-static` 디렉토리에 빌드 결과를 확인할 수 있습니다.
+
+배포 시 빌드를 하기 위해 storybook-static 디렉토리를 .gitignore에 추가합니다.
+
+```yml
+# .gitignore
+
+storybook-static
+```
+
+## 워크플로우 작성
+
+Github pages에 배포하기 위해서 github actions를 사용합니다.
+
+### Github  설정
+
+Github repository에서 action을 이용한 pages 배포를 설정합니다.
+
+Repository - Settings - Pages 로 이동하여 Build and deployment - source를 GitHub Actions로 설정합니다.
+
+![](https://velog.velcdn.com/images/freejak5520/post/f7660a55-81a7-4415-9693-c32af600136b/image.png)
+
+
+
+
+### 워크플로우 작성
+
+`.github/workflows/deploy-github-pages.yml` 파일을 생성하고 아래 처럼 작성합니다.
+
+```yml
+# .github/workflows/deploy-github-pages.yml
+
+name: Deploy storybook-static to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # Build storybook
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+      - run: npm install
+      - run: npm run build-storybook
+
+      # deploy
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: "./storybook-static"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+워크플로우 작성 후 main 브랜치로 푸시하면 배포가 시작됩니다.
+
+배포가 완료되면 `https://<username\>.github.io/<repository\>` URL로 배포된 스토리북에 접근이 가능합니다.
+
+
+
+## 참고
+
+[https://create-react-app.dev/docs/getting-started](https://create-react-app.dev/docs/getting-started)
+
+[https://storybook.js.org/docs/get-started/react-webpack5](https://storybook.js.org/docs/get-started/react-webpack5)
+
+[https://storybook.js.org/docs/sharing/publish-storybook](https://storybook.js.org/docs/sharing/publish-storybook)

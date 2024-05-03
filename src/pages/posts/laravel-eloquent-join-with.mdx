@@ -1,0 +1,81 @@
+---
+title: Laravel Eloquent에서 Join과 With
+description: Laravel의 Eloquent ORM을 사용하면서 모델(테이블)간 연관 관계를 조회하는 방법 중 일반적으로 join과 with를 사용합니다. 관계형 데이터베이스에서는 여러 테이블 간의 관계를 정의하고 이를 효율적으로 관리하는
+tag: Eloquent, laravel, php
+date: 2024/4/16
+---
+
+![thumbnail](https://velog.velcdn.com/images/freejak5520/post/7729a1e7-5a63-4eb5-938e-0f6a190b6b5d/image.jpg)
+
+Laravel의 Eloquent ORM을 사용하면서 모델(테이블)간 연관 관계를 조회하는 방법 중 일반적으로 `join`과 `with`를 사용합니다.
+
+## Join과 With를 사용하는 이유
+
+관계형 데이터베이스에서는 여러 테이블 간의 관계를 정의하고 이를 효율적으로 관리하는 것이 중요합니다. Laravel의 Eloquent ORM은 이러한 관계를 코드 수준에서 손쉽게 다룰 수 있게 해줍니다. 이때 `join`과 `with`는 모델 간의 관계를 로드하는 데 사용됩니다.
+
+## Join
+
+`join`은 SQL의 `JOIN` 구문을 사용하여 모델 간의 관계를 로드합니다.
+이 방법은 복잡한 쿼리를 작성할 때 사용할 수 있으며, 대량의 레코드를 조회할 때 `with`에 비해 성능상 유리할 수 있습니다.
+
+**예제**
+
+```php
+$posts = Post::join('users', 'posts.user_id', '=', 'users.id')
+             ->where('posts.published_at', '!=', null)
+             ->select('posts.*', 'users.name')
+             ->get();
+```
+
+**예상 쿼리**
+
+```sql
+SELECT *
+FROM `posts`
+JOIN `users` ON `posts`.`user_id` = `users`.`id`
+WHERE `posts`.`published_at` IS NOT NULL;
+```
+
+## With
+
+`with`는 [Eloquent의 Eager Loading](https://laravel.com/docs/11.x/eloquent-relationships#eager-loading) 기능을 사용하여 모델 간의 관계를 로드합니다.
+이 방법을 사용하려면 Model간 연관 관계를 미리 정의 해야하며, 대량의 레코드를 조회 시 성능이 비교적 떨어질 수 있습니다.
+또한 [Eloquent의 다형성 연관관계](https://laravel.com/docs/11.x/eloquent-relationships#polymorphic-relationships)를 이용하기 위해서도 `with`를 사용해야합니다.
+
+**예제**
+
+```php
+$posts = Post::with('user')->where('published_at', '!=', null)->get();
+
+// Post.php
+public function user()
+{
+	return $this->belongsTo(User::class);
+}
+
+// User.php
+public function posts()
+{
+	return $this->hasMany(Post::class);
+}
+```
+
+**예상 쿼리**
+
+```sql
+SELECT *
+FROM `posts`
+WHERE `posts`.`published_at` IS NOT NULL;
+
+SELECT *
+FROM `users`
+WHERE `users`.`id` IN (1, 2, 3, ...);
+```
+
+## 결론
+
+`with`를 사용하면 Eloquent의 기능을 사용할 수 있지만, 대량의 레코드 조회 시 `join`을 사용해서 성능을 개선하는 등 상황에 맞는 사용이 필요해 보입니다.
+
+## 참고
+- https://laravel.com/docs/11.x/eloquent-relationships
+- https://stackoverflow.com/questions/53385230/laravel-eloquent-join-vs-with

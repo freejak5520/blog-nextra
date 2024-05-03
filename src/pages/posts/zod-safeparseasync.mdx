@@ -1,0 +1,138 @@
+---
+title: zod - safeParseAsync의 유효성 검사 실행 순서
+description: zod 라이브러리의 safeParseAsync를 사용할 때 여러 개의 async 함수가 refine으로 등록될 경우,유효성 검사 시 async 함수들을 순차적으로 실행할지, 병렬로 실행할지 궁금증이 생겨 테스트를 진행해 봤습니다.
+tag: zod
+date: 2024/4/10
+---
+
+<img src="https://velog.velcdn.com/images/freejak5520/post/34aaaf49-3c4b-411f-84ce-6b3b37fce0cd/image.png" alt="post-thumbnail"/>
+
+[zod 라이브러리](https://zod.dev/)의 `safeParseAsync`를 사용할 때 여러 개의 async 함수가 refine으로 등록될 경우,
+유효성 검사 시 async 함수들을 순차적으로 실행할지, 병렬로 실행할지 궁금증이 생겨 테스트를 진행해 봤습니다.
+
+## 테스트 코드
+
+테스트는 Next.js 프로젝트에서 진행했습니다.
+
+```ts
+"use server";
+
+import { z } from "zod";
+
+const schema = z
+  .object({
+    username: z
+      .string()
+      .refine(async () => {
+        console.log("start username 1");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log("end username 1");
+        return true;
+      })
+      .refine(async () => {
+        console.log("start username 2");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log("end username 2");
+        return true;
+      }),
+    email: z
+      .string()
+      .refine(async () => {
+        console.log("start email 1");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log("end email 1");
+        return true;
+      })
+      .refine(async () => {
+        console.log("start email 2");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log("end email 2");
+        return true;
+      }),
+  })
+  .refine(async () => {
+    console.log("start object 1");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log("end object 1");
+    return true;
+  })
+  .refine(async () => {
+    console.log("start object 2");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log("end object 2");
+    return true;
+  });
+
+export const action = async (_: any, formData: FormData) => {
+  const formDataObject = Object.fromEntries(formData.entries());
+
+  console.log("==Start==", new Date());
+
+  const parsedData = await schema.safeParseAsync(formDataObject);
+
+  console.log("==End==", new Date());
+
+  if (!parsedData.success) {
+    return parsedData.error.flatten();
+  }
+};
+```
+
+## 결과
+
+약 4초 소요
+
+```
+==Start== 2024-04-10T08:24:27.070Z
+start username 1
+start email 1
+end username 1
+start username 2
+end email 1
+start email 2
+end username 2
+end email 2
+start object 1
+end object 1
+start object 2
+end object 2
+==End== 2024-04-10T08:24:31.079Z
+```
+
+**실험으로 예상할 수 있는 유효성 검사 순서**
+
+1. 각각의 필드는 병렬로 실행
+```
+start username 1
+start email 1
+```
+
+2. 필드에 등록된 유효성 검사는 해당 필드에 먼저 등록된 유효성 검사가 끝나고 실행
+```
+end email 1
+start email 2
+```
+
+3. 모든 필드의 유효성 검사가 끝난 후 object에 등록된 유효성 검사를 시작
+```
+end username 2
+end email 2
+start object 1
+```
+
+4. object에 등록된 유효성 검사를 순차적으로 실행 및 종료
+```
+start object 1
+end object 1
+start object 2
+end object 2
+```
+
+## 결론
+
+유효성 검사를 위해 DB를 조회하는 등, 비동기 처리가 필요할 경우, 각각의 필드는 병렬로 처리되기 때문에 크게 걱정할 필요가 없어 보입니다.
+
+하나의 필드에 등록된 여러 개의 유효성 검사가 각각 DB에 접근해야 한다면 `superRefine`에서 Promise.all()로 처리하는 방법을 고려해 봐야 할 것 같습니다.
+
+
+![](https://velog.velcdn.com/images/freejak5520/post/4bb6caf6-a3d9-4b17-a1ce-be51898a7e90/image.png)

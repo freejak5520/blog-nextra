@@ -1,0 +1,70 @@
+---
+title: Next.js - 서버에서 렌더링 되는 Client component
+description: Next.js 13 이후 부터 사용자와 상호작용을 하기 위한 컴포넌트를 구현하기 위해서는 클라이언트 컴포넌트를 사용해야합니다.
+tag: next.js
+date: 2024/4/10
+---
+
+<img src="https://velog.velcdn.com/images/freejak5520/post/1784476c-215d-4894-8896-7e25bfd6d714/image.png" alt="post-thumbnail"/>
+
+Next.js 13 이후 부터 사용자와 상호작용을 하기 위한 컴포넌트를 구현하기 위해서는 클라이언트 컴포넌트를 사용해야합니다.
+
+## 클라이언트 렌더링
+
+- 상호 작용 가능: state, effect, event listener 를 사용할 수 있으므로 즉각적인 피드백과 UI 업데이트를 제공할 수 있습니다.
+- 브라우저 API: geolocation, localStorage 같은 브라우저 API 를 사용할 수 있습니다.
+
+## 사용하기
+
+클라이언트 컴포넌트를 사용하기 위해 `use client` 지시어를 추가합니다.
+
+```ts
+'use client'
+ 
+import { useState } from 'react'
+ 
+export default function Counter() {
+  const [count, setCount] = useState(0)
+ 
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  )
+}
+```
+
+## 렌더링
+
+클라이언트 컴포넌트는 전체 페이지 로드(첫 접속, 새로고침)와 navgation을 사용한 페이지 로드가 다르게 동작합니다.
+
+### 전체 페이지 로드
+
+초기 페이지 로드 시 성능을 위해 Next.js는 클라이언트, 서버 컴포넌트 전부를 서버에서 HTML 미리보기를 렌더링 합니다.
+사용자가 처음 접속 시 Javascript 번들을 다운로드 하고 실행 하기 까지 기다릴 필요없이 페이지 내용을 바로 확인 가능합니다.
+
+**서버**
+
+1. React는 서버 컴포넌트를 클라이언트 컴포넌트 레퍼런스를 포함하여 React Server Component Payload(RSC Payload)로 렌더링 합니다.
+2. Next.js는 RSC Payload 와 클라이언트 컴포넌트의 Javascript로 HTML을 렌더링 합니다.
+
+**클라이언트**
+
+1. 서버에서 미리 렌더링된 HTML이 로드되면 사용자에게 보여줍니다.
+2. RSC Payload를 이용하여 클라이언트, 서버 컴포넌트를 조정(reconcile)하고 DOM을 업데이트 할 수 있습니다.
+3. Javascript는 클라이언트 컴포넌트를 hidrate 하여 UI를 상호작용 가능하게 만듭니다.
+
+### Navigation을 이용한 페이지 이동
+
+페이지가 로드된 후 navigate를 이용한 페이지 이동은 서버에서 렌더링된 HTML없이 전부 클라이언트에서 렌더링 됩니다.
+
+
+1. 사용자가 새로운 페이지로 이동하면, 해당 페이지에 필요한 클라이언트 컴포넌트의 JavaScript 코드가 브라우저로 다운로드되고 파싱됩니다.
+2. JavaScript 번들이 준비되면, React는 이를 사용하여 클라이언트와 서버 컴포넌트 트리 간의 조정(reconcile)을 수행합니다.
+이는 서버에서 생성된 데이터(RSC Payload)와 클라이언트 측의 컴포넌트 상태를 일치시키는 과정을 포함합니다.
+3. 조정(reconcile) 과정을 통해, React는 필요한 변경사항을 식별하고 DOM을 업데이트하여 사용자에게 최종적인 UI를 제공합니다.
+
+## 참고
+
+https://nextjs.org/docs/app/building-your-application/rendering/client-components

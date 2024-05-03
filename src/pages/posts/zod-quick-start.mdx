@@ -1,0 +1,98 @@
+---
+title: zod 간단하게 사용해보기
+description: zod는 JavaScript와 TypeScript를 위한 유효성 검사(validation) 라이브러리입니다. Next.js 백엔드에서 zod를 적용하면 간단한 사용법으로 유효성 검사를 수행할 수 있습니다.
+tag: javascript, typescript, zod
+date: 2024/3/27
+---
+
+![](https://velog.velcdn.com/images/freejak5520/post/7e70c2c4-c6d3-412d-8ffd-7dc83c906c00/image.png)
+
+zod는 JavaScript와 TypeScript를 위한 유효성 검사(validation) 라이브러리입니다.
+Next.js 백엔드에서 zod를 적용하면 간단한 사용법으로 유효성 검사를 수행할 수 있습니다.
+
+## 설치
+
+```bash
+npm install zod       # npm
+# 또는
+yarn add zod          # yarn
+bun add zod           # bun
+pnpm add zod          # pnpm
+```
+
+## 사용 방법
+
+zod는 직관적이고 간단한 API를 제공합니다.
+
+아래 예시는 가장 기본적인 zod 라이브러리 사용법입니다.
+
+### 기본 유효성 검사
+
+```ts
+import { z } from "zod";
+
+const usernameSchema = z.string().min(4).max(20).optional();
+
+usernameSchema.parse("username"); // => "username" (유효한 값)
+usernameSchema.parse(12); // => 숫자 타입이므로 ZodError 발생
+```
+
+발생한 ZodError를 확인하면 다음과 같이 에러 내용을 알 수 있습니다.
+```ts
+Error: [
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "number",
+    "path": [],
+    "message": "Expected string, received number"
+  }
+]
+```
+
+### 객체 스키마
+
+입력에 대한 여러 필드에 대한 유효성 검사를 위해 객제 스키마를 사용할 수 있습니다.
+
+```ts
+import { z } from "zod";
+
+const userSchema = z.object({
+  username: z.string().min(4).max(20).optional(),
+  email: z.string().email().nullable(),
+});
+
+userSchema.parse({
+  username: 'username',
+  email: 'test@example.com',
+});
+```
+
+### safeParse
+
+parse 메서드를 사용할 때 유효성 검사가 실패하면 zod는 Error를 발생시킵니다.
+그러나 경우에 따라 에러를 발생시키지 않고, 유효성 검사 결과를 반환받아 별도로 처리하고 싶을 때가 있습니다.
+이때 safeParse를 사용할 수 있습니다.
+
+```ts
+import { z } from "zod";
+
+const usernameSchema = z.string().min(4).max(20).optional();
+
+const validResult = usernameSchema.safeParse("username"); // { success: true, data: "username" }
+const invalidResult = usernameSchema.safeParse(12); // { success: false, error: ZodError }
+
+if (invalidResult.success) {
+  // 유효한 데이터 처리
+  console.log(invalidResult.data);
+} else {
+  // 유효성 검사 실패 처리
+  console.log(invalidResult.error);
+}
+```
+
+safeParse는 유효성 검사 실패시 에러를 발생시키지 않고, 결과를 객체 형태로 반환합니다.
+이 객체에는 success 속성과 data 또는 error 속성이 포함되어 있으며, success가 true이면 data에 유효한 값이 있고, false이면 error에 ZodError 객체가 있습니다.
+
+## 참고
+- https://zod.dev/

@@ -1,0 +1,21 @@
+---
+title: fsevents 패키지 에러 발생
+description: yarn install중 아래 에러 발생fsevents 패키지는 macOS 용이므로 linux와 windows에서는 에러가 발생합니다.이를 해결하기 위해 package.json에 아래 처럼 추가합니다.
+date: 2024/4/5
+---
+
+`yarn install`중 아래 에러 발생
+
+```
+error fsevents@2.3.3: The platform "linux" is incompatible with this module.
+```
+
+fsevents 패키지는 macOS 용이므로 linux와 windows에서는 에러가 발생합니다.
+
+이를 해결하기 위해 `package.json`에 아래 처럼 추가합니다.
+
+```json
+"optionalDependencies": {
+  "fsevents": "*"
+},
+```

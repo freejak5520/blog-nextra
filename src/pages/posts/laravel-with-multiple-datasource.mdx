@@ -1,0 +1,74 @@
+---
+title: 다중 데이터베이스 연결을 사용한 모델 관계 정의하기 - Laravel
+description: Laravel 프로젝트 진행 중 하나의 프로젝트에서 2개 이상의 connection간 모델의 연관 관계 정의가 필요했고, eloquent relationship을 이용하여 처리했습니다.
+tag: Eloquent, laravel, php
+date: 2024/3/27
+---
+
+![Laravel](https://velog.velcdn.com/images/freejak5520/post/b741ea57-1c90-45e5-99e5-50ec84ac4ba0/image.webp)
+
+프로젝트 진행 중 하나의 프로젝트에서 2개 이상의 connection간 모델의 연관 관계 정의가 필요했고, eloquent relationship을 이용하여 처리했습니다.
+
+아래는 `service` connection의 `User` 모델과 `log` connection의 `UserLog` 모델간의 연관관계 예제 입니다.
+
+```php
+// User.php
+public class User extends Model
+{
+	protected $connection = 'service';
+    // ...
+    
+    public function userLogs(): HasMany
+    {
+        return $this
+        	->setConnection('log')
+            ->hasMany(UserLog::class, 'user_id', 'id');
+    }
+}
+```
+
+```php
+// UserLog.php
+public class UserLog extends Model
+{
+	protected $connection = 'log';
+    
+    // ...
+    
+    public function user(): BelongsTo
+    {
+        return $this
+            ->setConnection('service')
+            ->belongsTo(User::class, 'user_id', 'id');
+    }
+}
+```
+
+연관 관계 정의 후 with를 이용하여 조회 가능하며 아래처럼 쿼리가 실행됩니다.
+
+```php
+User::where('id', 1)->with('userLogs')->get();
+
+// service connection
+// DB::connection('service')->getQueryLog();
+[
+    [
+        "query" => "select * from `users` where `id` = ?",
+        "bindings" => [
+            1,
+        ],
+        "time" => 86.8,
+    ],
+];
+
+// log connection
+// DB::connection('log')->getQueryLog();
+[
+    [
+        "query" => "select * from `user_logs` where `user_logs`.`user_id` in (1)",
+        "bindings" => [],
+        "time" => 84.42,
+    ],
+];
+```
+

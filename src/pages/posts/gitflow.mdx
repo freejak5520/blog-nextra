@@ -1,0 +1,63 @@
+---
+title: Gitflow
+description: Gitflow는 Git을 사용하는 프로젝트에서 효율적인 버전 관리와 협업을 위해 디자인된 브랜칭 모델입니다.
+tag: git, gitflow
+date: 2024/4/7
+---
+
+<img src="https://velog.velcdn.com/images/freejak5520/post/aa634b53-0c41-4345-a77a-9cfdc620821f/image.png" alt="post-thumbnail"/>
+
+Gitflow는 Git을 사용하는 프로젝트에서 효율적인 버전 관리와 협업을 위해 디자인된 브랜칭 모델입니다.
+이 모델은 Vincent Driessen에 의해 처음 소개되었으며, 기능 개발, 릴리스 준비, 유지보수 등 프로젝트의 다양한 단계를 관리하기 위한 명확한 규칙과 절차를 제공합니다.
+
+## 주요 브랜치
+
+- **main(master)**: 제품으로 출시될 준비가 된 코드를 담는 브랜치입니다. 이 브랜치에서 태그를 사용하여 릴리스 버전을 관리합니다.
+
+- **develop**: 다음 릴리스를 위한 개발 작업이 진행되는 브랜치입니다. 기능 개발이 완료되면 이 브랜치로 병합됩니다.
+
+- **feature**: 새로운 기능 개발이나 버그 수정과 같은 작업을 위한 브랜치입니다. 각 기능 또는 수정 사항은 `develop` 브랜치로부터 분기되어 개발되며, 작업 완료 후 `develop` 브랜치로 병합됩니다.
+
+- **release**: 릴리스 준비를 위한 브랜치입니다. `develop` 브랜치에서 분기되며, 릴리스 준비 과정에서 발견된 버그 수정 등의 작업이 이루어집니다. 준비가 완료되면 `main`과 `develop` 브랜치로 병합됩니다.
+
+- **hotfix**: 이미 릴리스된 버전에서 긴급하게 수정해야 할 버그를 처리하기 위한 브랜치입니다. `main` 브랜치에서 분기되며, 수정이 완료되면 `main`과 `develop` 브랜치로 병합됩니다.
+
+<img alt="Gitflow graph" src="https://velog.velcdn.com/images/freejak5520/post/45df42d4-f0a2-4b21-b23c-afea5ff142f5/image.png" width="50%"/>
+
+## Workflow
+
+### 1. 초기 설정
+
+- `main` 브랜치를 생성하고, 이를 기본 브랜치로 설정합니다. 이 브랜치는 출시 준비가 완료된 코드를 담습니다.
+
+- `develop` 브랜치를 `main`에서 분기하여 생성합니다. 모든 개발 작업은 이 브랜치에서 시작됩니다.
+
+### 2. 기능 개발 (feature 브랜치)
+
+- 새로운 기능 개발이나 버그 수정이 필요할 때, `develop` 브랜치에서 `feature` 브랜치를 분기합니다.
+
+- 개발이 완료되면, `feature` 브랜치를 `develop` 브랜치로 병합합니다. 이때, `feature` 브랜치는 삭제할 수 있습니다.
+
+### 3. 릴리스 준비 (release 브랜치)
+
+- 다음 버전을 출시하기 위한 준비가 시작되면, `develop` 브랜치에서 `release` 브랜치를 분기합니다.
+
+- `release` 브랜치에서는 버그 수정, 문서 작업, 기타 릴리스 준비 작업을 수행합니다.
+준비가 완료되면, `release` 브랜치를 `main` 브랜치로 병합하고, 릴리스 버전 태그를 추가합니다. 동시에 `develop` 브랜치로도 병합하여, 릴리스에서 이루어진 변경 사항을 반영합니다.
+
+### 4. 핫픽스 (hotfix 브랜치)
+
+- 출시된 버전에서 긴급하게 수정해야 할 버그가 발견되면, `main` 브랜치에서 `hotfix` 브랜치를 분기합니다.
+
+- 수정이 완료되면, `hotfix` 브랜치를 `main` 브랜치로 병합하고, 새로운 릴리스 버전 태그를 추가합니다. 또한, 이 변경 사항을 `develop` 브랜치에도 병합하여, 개발 중인 코드에도 수정 사항을 반영합니다.
+
+### 5. 반복
+
+- 위의 과정을 반복하면서, 지속적으로 기능을 개발하고, 릴리스를 준비하며, 필요한 경우 핫픽스 진행합니다.
+
+
+## 참고
+
+- https://techblog.woowahan.com/2553/
+- https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+- https://www.atlassian.com/continuous-delivery/continuous-integration/trunk-based-development
