@@ -9,17 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [21.x]
-
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Yarn
+        uses: threeal/setup-yarn-action@v2
+
       - run: cp .env.example .env
       - run: yarn install
       - run: yarn lint
