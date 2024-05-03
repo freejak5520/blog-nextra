@@ -1,14 +1,14 @@
-import { TrackingHeadScript } from "@phntms/next-gtm";
-import type { AppProps } from "next/app";
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Analytics } from "@vercel/analytics/react";
+import type { AppProps } from "next/app";
 
-const GA_ID = "GTM-MLQ58GB3";
+const GA_ID = "G-LVHSN5LRTR";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
+      <GoogleAnalytics  gaId={GA_ID} />
       <Analytics />
-      <TrackingHeadScript id={GA_ID} isGTM={true} />
       <Component {...pageProps} />
     </>
   );
