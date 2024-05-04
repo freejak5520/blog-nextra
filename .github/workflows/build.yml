@@ -1,4 +1,7 @@
-name: Node.js CI
+name: CI
+
+env:
+  SITE_URL: ${{ vars.SITE_URL }}
 
 on:
   pull_request:
