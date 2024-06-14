@@ -1,0 +1,71 @@
+---
+title: iOS 브라우저에서의 뷰포트 높이 문제와 해결 방법
+tags: CSS, iOS, safari
+description: sticky position 적용을 위해 모바일에서 영역 높이를 뷰포트 만큼 설정해야 하는 경우 iOS 브라우저에서 height 100vh 를 적용할 영역이 경우 예상보다 길게 적용되는 특징을 확인했습니다.
+date: 2024/5/31
+---
+
+
+## 문제 발생
+
+`position: sticky;`를 적용을 위해 모바일에서 영역 높이를 뷰포트 만큼 설정해야 하는 경우 iOS 브라우저에서 height: 100vh; 를 적용할 영역이 경우 예상보다 길게 적용되는 특징을 확인했습니다.
+
+![Sticky 헤더, 푸터를 적용했지만 ios 사파리의 툴바에 가려지는 이슈 이미지](https://velog.velcdn.com/images/freejak5520/post/f6a026a7-4d87-435f-98df-2d6144fbff89/image.png)
+
+
+## 해결 방법
+
+여러 해결 방법 중 3가지를 소개합니다.
+
+### 1. `-webkit-fill-available` 사용
+
+`height`에 `-webkit-fill-available`을 적용해 iOS 브라우저에서 해결 가능합니다.
+
+```css
+.container {
+  height: -webkit-fill-available;
+}
+```
+
+### 2. `dvh` 사용
+
+`dvh`는 동적 뷰포트 높이(Dynamic viewport height)라는 뜻으로 `1dvh`는 동적 뷰포트 높이의 1%와 같습니다.
+
+`dvh`는 브라우저 UI 변경으로 인한 크기 조절 시 반영됩니다.
+
+```css
+.container {
+  height: 100dvh;
+}
+```
+
+`dvh` 사용 시 아래 링크에서 브라우저 호환성을 확인 가능합니다.
+<https://caniuse.com/mdn-css_types_length_viewport_percentage_units_dynamic>
+
+### 3. 자바스크립트를 이용한 해결(커스텀 vh)
+
+자바스크립트를 이용해 document 크기가 변경될 때 마다 실제 inner height를 이용해 커스텀 vh를 지정하여 해결 가능합니다.
+
+```javascript
+function setCustomVh() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+setCustomVh();
+window.addEventListener('resize', setCustomVh);
+```
+
+이후 --vh 변수를 이용해 아래처럼 사용 가능합니다.
+
+```css
+.container {
+  height: calc(var(--vh) * 100);
+}
+```
+
+## 참고
+
+<https://www.linkedin.com/pulse/understanding-dvh-lvh-svh-css-prabhath-senadheera-wmvkc/>
+
+<https://mong-blog.tistory.com/entry/CSSJS-vh-%EB%B2%84%EA%B7%B8-%ED%95%B4%EA%B2%B0%EB%B0%A9%EB%B2%95dvh-%EC%82%AC%EC%9A%A9%EB%B2%95-js-%EA%B3%84%EC%82%B0%EB%B2%95>
