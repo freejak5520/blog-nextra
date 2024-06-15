@@ -1,5 +1,5 @@
 const config = {
-  siteUrl: process.env.SITE_URL,
+  siteUrl: process.env.SITE_URL || "https://nextra.zvdev.com",
   generateRobotsTxt: true,
 };
 
